@@ -1,0 +1,6 @@
+cat_api.admin_settings_form:
+  title: 'Cat API configuration'
+  route_name: cat_api.admin_settings_form
+  description: 'Configuration Page for Cat API Module'
+  parent: system.admin_config_services
+  weight: 99
