@@ -1,0 +1,6 @@
+name: Cat Api
+type: module
+description: 'Module for getting cat images using cat api'
+package: Custom
+core: 8.x
+hidden: false
