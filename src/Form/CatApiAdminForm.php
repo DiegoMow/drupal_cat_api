@@ -11,6 +11,7 @@ use Drupal\Core\Link;
 
 class CatApiAdminForm extends ConfigFormBase {
 
+  const CAT_API_SETTINGS = 'cat_api.settings';
   /**
    * {@inheritdoc}
    */
@@ -23,7 +24,7 @@ class CatApiAdminForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      'cat_api.adminsettings',
+      self::CAT_API_SETTINGS,
     ];
   }
 
@@ -43,7 +44,7 @@ class CatApiAdminForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('cat_api.adminsettings');
+    $config = $this->config(self::CAT_API_SETTINGS);
 
     $form['cat_api_url'] = [
       '#type' => 'textfield',
@@ -68,11 +69,14 @@ class CatApiAdminForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    parent::submitForm($form, $form_state);
 
-    $this->config('cat_api.adminsettings')
+    $this->configFactory->getEditable(self::CAT_API_SETTINGS)
       ->set('cat_api_url', $form_state->getValue('cat_api_url'))
       ->set('cat_api_key', $form_state->getValue('cat_api_key'))
       ->save();
+
+    parent::submitForm($form, $form_state);
   }
+
+  
 }  
