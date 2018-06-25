@@ -1,17 +1,38 @@
 <?php
 /**
  * @file
- * Contains Drupal\welcome\Form\CatApiAdminForm.
+ * Contains Drupal\cat_api\Form\CatApiAdminForm.
  */
+
 namespace Drupal\cat_api\Form;
+
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 
+/**
+ * Class for the Admin form of Cat API.
+ */
 class CatApiAdminForm extends ConfigFormBase {
 
+  /**
+   * Const with name of setting.
+   */
   const CAT_API_SETTINGS = 'cat_api.settings';
+
+  /**
+   * Function to return the documentation link.
+   *
+   * @return string
+   *   HTML Markup with link.
+   */
+  protected function getDocumentationLink() {
+    $link_text = $this->t('The Cat API documentation');
+    $link_url = Url::fromUri('http://thecatapi.com/docs.html');
+    return Link::fromTextAndUrl($link_text, $link_url)->toString();
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -29,18 +50,6 @@ class CatApiAdminForm extends ConfigFormBase {
   }
 
   /**
-   * Function to return the documentation link.
-   *
-   * @return String
-   *   HTML Markup with link.
-   */
-  protected function getDocumentationLink() {
-    $link_text = $this->t('The Cat API documentation');
-    $link_url = Url::fromUri('http://thecatapi.com/docs.html');
-    return Link::fromTextAndUrl($link_text, $link_url)->toString();
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
@@ -54,7 +63,7 @@ class CatApiAdminForm extends ConfigFormBase {
       '#default_value' => $config->get('cat_api_url'),
     ];
     $message = $this->t('You can make unlimited requests without an API key, but you\'ll only get access to the first 1000 Images and also you can\'t access other features from the API.<br>For more info, plese see ');
-    
+
     $form['cat_api_key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Cat API Key'),
@@ -77,6 +86,4 @@ class CatApiAdminForm extends ConfigFormBase {
 
     parent::submitForm($form, $form_state);
   }
-
-  
-}  
+}
