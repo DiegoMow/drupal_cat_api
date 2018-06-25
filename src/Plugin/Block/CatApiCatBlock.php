@@ -32,6 +32,6 @@ class CatApiCatBlock extends BlockBase {
    * {@inheritdoc}
    */
   protected function blockAccess(AccountInterface $account) {
-    return AccessResult::allowedIfHasPermission($account, 'access content');
+    return AccessResult::allowedIfHasPermission($account, 'access cat api content');
   }
 }
