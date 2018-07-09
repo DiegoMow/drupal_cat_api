@@ -10,6 +10,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
+use Drupal\Component\Utility;
 
 /**
  * Class for the Admin form of Cat API.
@@ -53,6 +54,21 @@ class CatApiAdminForm extends ConfigFormBase {
       '<ul><li>' . $this->t('Get Requests: <b>@qtd</b>', ['@qtd' => $stats['total_get_requests']], self::CAT_API_T_CONTEXT) . '</li>' .
       '<li>' . $this->t('Votes: <b>@qtd</b>', ['@qtd' => $stats['total_votes']], self::CAT_API_T_CONTEXT) . '</li>' .
       '<li>' . $this->t('Favourites: <b>@qtd</b>', ['@qtd' => $stats['total_favourites']], self::CAT_API_T_CONTEXT) . '</li></ul>';
+  }
+
+  /**
+   * Gets a category list to use on radios element.
+   *
+   * @return array
+   *   An array with all categories options formated.
+   */
+  protected function getCategories() {
+    $categories = \Drupal::service('cat_api.api')->getCategories();
+    $options = ['all' => $this->t('All <b>CAT</b>egories', [], self::CAT_API_T_CONTEXT)];
+    foreach ($categories as $category) {
+      $options[$category['id']] = $this->t(ucfirst($category['name']), [], self::CAT_API_T_CONTEXT);
+    }
+    return $options;
   }
 
   /**
@@ -118,13 +134,28 @@ class CatApiAdminForm extends ConfigFormBase {
     $image_formats_options =[
       'jpg' => 'jpg',
       'gif' => 'gif',
-      'png' => 'png'
+      'png' => 'png',
     ];
     $form['cat_api_detail_1']['cat_api_formats'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Formats', [], self::CAT_API_T_CONTEXT),
       '#options' => $image_formats_options,
       '#default_value' => !empty($image_formats) ? $image_formats : $image_formats_options,
+      '#required' => TRUE,
+    ];
+    $form['cat_api_detail_2'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Cat Categories', [], self::CAT_API_T_CONTEXT),
+      '#open' => FALSE,
+    ];
+    $form['cat_api_detail_2']['cat_api_category_markup'] = [
+      '#markup' => $this->t('The <b>CAT</b>egories is a way to choose which kind of cat do you want to show. Unfortunatelly, the API permits only one category. For more information, please see the @docs.', ['@docs' => $this->getDocumentationLink()], self::CAT_API_T_CONTEXT),
+    ];
+    $form['cat_api_detail_2']['cat_api_category'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Available options', [], self::CAT_API_T_CONTEXT),
+      '#options' => $this->getCategories(),
+      '#default_value' => $config->get('cat_api_category'),
       '#required' => TRUE,
     ];
     return parent::buildForm($form, $form_state);
@@ -140,6 +171,7 @@ class CatApiAdminForm extends ConfigFormBase {
       ->set('cat_api_key', $form_state->getValue('cat_api_key'))
       ->set('cat_api_size', $form_state->getValue('cat_api_size'))
       ->set('cat_api_formats', $form_state->getValue('cat_api_formats'))
+      ->set('cat_api_category', $form_state->getValue('cat_api_category'))
       ->save();
 
     parent::submitForm($form, $form_state);

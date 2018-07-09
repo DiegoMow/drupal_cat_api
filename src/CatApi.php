@@ -99,6 +99,11 @@ class CatApi {
     if (!empty($id)) {
       $params['image_id'] = $id;
     }
+    // Here I add the category param, but if we have an Id, it's ignored.
+    $category = $this->config->get('cat_api_category');
+    if ($category !== 'all') {
+      $params['category'] = $this->getCategoryName($category);
+    }
     $result = $this->call(self::CAT_API_GET_IMAGES, $params);
     return $result['data']['images']['image'];
   }
@@ -127,8 +132,10 @@ class CatApi {
       $this->logger->warning($this->t('[BIG NUMBER] Wrong value used in function call! Will use "100" instead. Value: @qtde', ['@qtde' => $qtde]));
       $params['results_per_page'] = 100;
     }
-    //TODO: Support for Cat Category Lists.
-    //TODO: Support for Sizes of images.
+    $category = $this->config->get('cat_api_category');
+    if ($category !== 'all') {
+      $params['category'] = $this->getCategoryName($category);
+    }
 
     $results = $this->call(self::CAT_API_GET_IMAGES, $params);
     $images = $results['data']['images']['image'];
@@ -153,6 +160,38 @@ class CatApi {
       }
     }
     return implode(',', $formats);
+  }
+
+  /**
+   * Get a complete list of Categories.
+   * 
+   * @return array
+   *   An array with existing categories.
+   */
+  public function getCategories() {
+    $categories = $this->call(self::CAT_API_CATEGORIES);
+    return $categories['data']['categories']['category'];
+  }
+
+  /**
+   * Return the category name according to the category ID provided.
+   *
+   * @param string $id
+   *   A CATegory id.
+   *
+   * @return string
+   *   The name of the Category.
+   */
+  public function getCategoryName(string $id) {
+    $name = '';
+    $categories = $this->getCategories();
+    foreach ($categories as $category) {
+      if ($category['id'] === $id) {
+        $name = $category['name'];
+        break;
+      }
+    }
+    return $name;
   }
 
   /**
