@@ -94,6 +94,7 @@ class CatApi {
       'results_per_page' => 1,
       'format' => 'xml',
       'type' => $this->getImageTypes(),
+      'size' => $this->config->get('cat_api_size'),
     ];
     if (!empty($id)) {
       $params['image_id'] = $id;
@@ -116,6 +117,7 @@ class CatApi {
       'results_per_page' => $qtde,
       'format' => 'xml',
       'type' => $this->getImageTypes(),
+      'size' => $this->config->get('cat_api_size'),
     ];
     if ($qtde <= 0) {
       $this->logger->warning($this->t('[LOW NUMBER] Wrong value used in function call! Will use "1" instead. Value: @qtde', ['@qtde' => $qtde]));
@@ -161,7 +163,7 @@ class CatApi {
    */
   public function getStats(string $key = '') {
     $params = [
-      'api_key' => !empty($key) ? $key : $this->config->get('cat_api_key')
+      'api_key' => !empty($key) ? $key : $this->config->get('cat_api_key'),
     ];
     return $this->call(self::CAT_API_STATS, $params);
   }

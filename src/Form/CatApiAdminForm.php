@@ -98,16 +98,31 @@ class CatApiAdminForm extends ConfigFormBase {
       $form['cat_api_stats'] = ['#markup' => $this->getStatsList($key)];
     }
 
+    $form['cat_api_detail_1'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Image configurations', [], self::CAT_API_T_CONTEXT),
+      '#open' => FALSE,
+    ];
+    $form['cat_api_detail_1']['cat_api_size'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Size'),
+      '#options' => [
+        'full' => $this->t('Full - Original size', [], self::CAT_API_T_CONTEXT),
+        'med' => $this->t('Medium - 500px as max width and/or height', [], self::CAT_API_T_CONTEXT),
+        'small' => $this->t('Small - 250px as max width and/or height', [], self::CAT_API_T_CONTEXT),
+      ],
+      '#default_value' => $config->get('cat_api_size'),
+      '#required' => TRUE,
+    ];
     $image_formats = $config->get('cat_api_formats');
     $image_formats_options =[
       'jpg' => 'jpg',
       'gif' => 'gif',
       'png' => 'png'
     ];
-    $form['cat_api_formats'] = [
+    $form['cat_api_detail_1']['cat_api_formats'] = [
       '#type' => 'checkboxes',
-      '#title' => $this->t('Image formats allowed', [], self::CAT_API_T_CONTEXT),
-      '#description' => $this->t('Select at least one value.', [], self::CAT_API_T_CONTEXT),
+      '#title' => $this->t('Formats', [], self::CAT_API_T_CONTEXT),
       '#options' => $image_formats_options,
       '#default_value' => !empty($image_formats) ? $image_formats : $image_formats_options,
       '#required' => TRUE,
@@ -123,6 +138,7 @@ class CatApiAdminForm extends ConfigFormBase {
     $this->configFactory->getEditable(self::CAT_API_SETTINGS)
       ->set('cat_api_url', $form_state->getValue('cat_api_url'))
       ->set('cat_api_key', $form_state->getValue('cat_api_key'))
+      ->set('cat_api_size', $form_state->getValue('cat_api_size'))
       ->set('cat_api_formats', $form_state->getValue('cat_api_formats'))
       ->save();
 
