@@ -1,0 +1,7 @@
+services:
+  cat_api.api:
+    class: Drupal\cat_api\CatApi
+    arguments: ['@config.factory', '@logger.channel.cat_api']
+  logger.channel.cat_api:
+    parent: logger.channel_base
+    arguments: ['cat_api']

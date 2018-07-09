@@ -23,8 +23,10 @@ class CatApiCatBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function build() {
+    $image = \Drupal::service('cat_api.api')->getImages(1);
+    $markup = '<img src="' . $image[0]['url'] . '" />';
     return [
-      '#markup' => $this->t('The cat Image Should Appear Here!!!'),
+      '#markup' => $this->t($markup),
     ];
   }
 
