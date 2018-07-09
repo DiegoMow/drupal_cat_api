@@ -72,6 +72,7 @@ class CatApi {
     $endpoint = $this->config->get('cat_api_url') . $api_endpoint;
     $url = Url::fromUri($endpoint, ['query' => $params])->toString();
     // TODO: Create error Handling for requests.
+    $this->logger->debug($this->t('Request made at endpoint @url', ['@url' => $url]));
     $client = \Drupal::httpClient();
     $request = $client->request('GET', $url);
     $results = new \SimpleXMLElement($request->getBody()->getContents());
@@ -91,7 +92,8 @@ class CatApi {
   public function getImage(string $id = '') {
     $params = [
       'results_per_page' => 1,
-      'format' => 'xml'
+      'format' => 'xml',
+      'type' => $this->getImageTypes(),
     ];
     if (!empty($id)) {
       $params['image_id'] = $id;
@@ -112,7 +114,8 @@ class CatApi {
   public function getImages(int $qtde) {
     $params = [
       'results_per_page' => $qtde,
-      'format' => 'xml'
+      'format' => 'xml',
+      'type' => $this->getImageTypes(),
     ];
     if ($qtde <= 0) {
       $this->logger->warning($this->t('[LOW NUMBER] Wrong value used in function call! Will use "1" instead. Value: @qtde', ['@qtde' => $qtde]));
@@ -122,7 +125,6 @@ class CatApi {
       $this->logger->warning($this->t('[BIG NUMBER] Wrong value used in function call! Will use "100" instead. Value: @qtde', ['@qtde' => $qtde]));
       $params['results_per_page'] = 100;
     }
-    //TODO: Make Customizable Extensions.
     //TODO: Support for Cat Category Lists.
     //TODO: Support for Sizes of images.
 
@@ -133,6 +135,22 @@ class CatApi {
       $images = [0 => $images];
     }
     return $images;
+  }
+
+  /**
+   * Getter for Allowed Image Types.
+   */
+  public function getImageTypes() {
+    $formats = $this->config->get('cat_api_formats');
+    if (empty($formats)) {
+      return 'jpg,gif,png';
+    }
+    foreach ($formats as $key=>$value) {
+      if ($value === 0) {
+        unset($formats[$key]);
+      }
+    }
+    return implode(',', $formats);
   }
 
   /**

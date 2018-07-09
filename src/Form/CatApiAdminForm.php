@@ -79,8 +79,8 @@ class CatApiAdminForm extends ConfigFormBase {
 
     $form['cat_api_url'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Cat API URL'),
-      '#description' => $this->t('The endpoint url for Cat Api Usage.'),
+      '#title' => $this->t('Cat API URL', [], self::CAT_API_T_CONTEXT),
+      '#description' => $this->t('The endpoint url for Cat Api Usage.', [], self::CAT_API_T_CONTEXT),
       '#required' => TRUE,
       '#default_value' => $config->get('cat_api_url'),
     ];
@@ -89,7 +89,7 @@ class CatApiAdminForm extends ConfigFormBase {
     $key = $config->get('cat_api_key');
     $form['cat_api_key'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Cat API Key'),
+      '#title' => $this->t('Cat API Key', [], self::CAT_API_T_CONTEXT),
       '#description' => $message . $this->getDocumentationLink() . '.',
       '#default_value' => $key,
     ];
@@ -98,6 +98,20 @@ class CatApiAdminForm extends ConfigFormBase {
       $form['cat_api_stats'] = ['#markup' => $this->getStatsList($key)];
     }
 
+    $image_formats = $config->get('cat_api_formats');
+    $image_formats_options =[
+      'jpg' => 'jpg',
+      'gif' => 'gif',
+      'png' => 'png'
+    ];
+    $form['cat_api_formats'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Image formats allowed', [], self::CAT_API_T_CONTEXT),
+      '#description' => $this->t('Select at least one value.', [], self::CAT_API_T_CONTEXT),
+      '#options' => $image_formats_options,
+      '#default_value' => !empty($image_formats) ? $image_formats : $image_formats_options,
+      '#required' => TRUE,
+    ];
     return parent::buildForm($form, $form_state);
   }
 
@@ -109,6 +123,7 @@ class CatApiAdminForm extends ConfigFormBase {
     $this->configFactory->getEditable(self::CAT_API_SETTINGS)
       ->set('cat_api_url', $form_state->getValue('cat_api_url'))
       ->set('cat_api_key', $form_state->getValue('cat_api_key'))
+      ->set('cat_api_formats', $form_state->getValue('cat_api_formats'))
       ->save();
 
     parent::submitForm($form, $form_state);
