@@ -22,6 +22,10 @@ class CatApiAdminForm extends ConfigFormBase {
   const CAT_API_SETTINGS = 'cat_api.settings';
 
   /**
+   * Const to use in String Translations.
+   */
+  const CAT_API_T_CONTEXT = ['context' => 'CAT_API_MODULE'];
+  /**
    * Function to return the documentation link.
    *
    * @return string
@@ -31,6 +35,24 @@ class CatApiAdminForm extends ConfigFormBase {
     $link_text = $this->t('The Cat API documentation');
     $link_url = Url::fromUri('http://thecatapi.com/docs.html');
     return Link::fromTextAndUrl($link_text, $link_url)->toString();
+  }
+
+  /**
+   * Check how many requests the inputed API did.
+   *
+   * @param string $key
+   *   The API Key to consult.
+   *
+   * @return string
+   *   An string markup to use as Markup Element.
+   */
+  protected function getStatsList(string $key) {
+    $stats = \Drupal::service('cat_api.api')->getStats($key);
+    $stats = $stats['data']['stats']['statsoverview'];
+    return $this->t('The inputed API Key already did: ', [], self::CAT_API_T_CONTEXT) .
+      '<ul><li>' . $this->t('Get Requests: <b>@qtd</b>', ['@qtd' => $stats['total_get_requests']], self::CAT_API_T_CONTEXT) . '</li>' .
+      '<li>' . $this->t('Votes: <b>@qtd</b>', ['@qtd' => $stats['total_votes']], self::CAT_API_T_CONTEXT) . '</li>' .
+      '<li>' . $this->t('Favourites: <b>@qtd</b>', ['@qtd' => $stats['total_favourites']], self::CAT_API_T_CONTEXT) . '</li></ul>';
   }
 
   /**
@@ -62,14 +84,19 @@ class CatApiAdminForm extends ConfigFormBase {
       '#required' => TRUE,
       '#default_value' => $config->get('cat_api_url'),
     ];
-    $message = $this->t('You can make unlimited requests without an API key, but you\'ll only get access to the first 1000 Images and also you can\'t access other features from the API.<br>For more info, plese see ');
+    $message = $this->t('You can make unlimited requests without an API key, but you\'ll only get access to the first 1000 Images and also you can\'t access other features from the API.<br>For more info, plese see ', [], self::CAT_API_T_CONTEXT);
 
+    $key = $config->get('cat_api_key');
     $form['cat_api_key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Cat API Key'),
       '#description' => $message . $this->getDocumentationLink() . '.',
-      '#default_value' => $config->get('cat_api_key'),
+      '#default_value' => $key,
     ];
+
+    if (!empty($key)) {
+      $form['cat_api_stats'] = ['#markup' => $this->getStatsList($key)];
+    }
 
     return parent::buildForm($form, $form_state);
   }

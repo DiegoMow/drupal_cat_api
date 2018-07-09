@@ -66,7 +66,7 @@ class CatApi {
   public function call(string $api_endpoint, array $params = []) {
     // TODO: Implement CACHE.
     $api_key = $this->config->get('cat_api_key');
-    if (!empty($api_key)) {
+    if (!empty($api_key) && !isset($params['api_key'])) {
       $params['api_key'] = $api_key;
     }
     $endpoint = $this->config->get('cat_api_url') . $api_endpoint;
@@ -133,6 +133,19 @@ class CatApi {
       $images = [0 => $images];
     }
     return $images;
+  }
+
+  /**
+   * Gets the Stats from an API Usage.
+   *
+   * @param string $key
+   *   The API Key to check. Use default if not set.
+   */
+  public function getStats(string $key = '') {
+    $params = [
+      'api_key' => !empty($key) ? $key : $this->config->get('cat_api_key')
+    ];
+    return $this->call(self::CAT_API_STATS, $params);
   }
 
 }
