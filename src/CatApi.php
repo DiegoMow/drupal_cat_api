@@ -80,16 +80,40 @@ class CatApi {
   }
 
   /**
+   * Return only one image or a specific image.
+   *
+   * @param string $id
+   *   Id of the image to load.
+   *
+   * @return array
+   *   An array with image data.
+   */
+  public function getImage(string $id = '') {
+    $params = [
+      'results_per_page' => 1,
+      'format' => 'xml'
+    ];
+    if (!empty($id)) {
+      $params['image_id'] = $id;
+    }
+    $result = $this->call(self::CAT_API_GET_IMAGES, $params);
+    return $result['data']['images']['image'];
+  }
+
+  /**
    * Return a quantity of desired images.
    *
    * @param int $qtde
    *   An int value between 0 and 100.
    *
-   * @return object
-   *   A response with values.
+   * @return array
+   *   A multiple array with images data.
    */
   public function getImages(int $qtde) {
-    $params = ['results_per_page' => $qtde];
+    $params = [
+      'results_per_page' => $qtde,
+      'format' => 'xml'
+    ];
     if ($qtde <= 0) {
       $this->logger->warning($this->t('[LOW NUMBER] Wrong value used in function call! Will use "1" instead. Value: @qtde', ['@qtde' => $qtde]));
       $params['results_per_page'] = 1;
@@ -99,7 +123,6 @@ class CatApi {
       $params['results_per_page'] = 100;
     }
     //TODO: Make Customizable Extensions.
-    $params['format'] = 'xml';
     //TODO: Support for Cat Category Lists.
     //TODO: Support for Sizes of images.
 

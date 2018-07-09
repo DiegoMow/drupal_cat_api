@@ -23,8 +23,9 @@ class CatApiCatBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function build() {
-    $image = \Drupal::service('cat_api.api')->getImages(1);
-    $markup = '<img src="' . $image[0]['url'] . '" />';
+    // TODO: Render Votes, favorites, and other stuff from api.
+    $image = \Drupal::service('cat_api.api')->getImage();
+    $markup = '<img src="' . $image['url'] . '" />';
     return [
       '#markup' => $this->t($markup),
     ];
