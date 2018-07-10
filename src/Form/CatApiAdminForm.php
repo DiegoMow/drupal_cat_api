@@ -26,6 +26,22 @@ class CatApiAdminForm extends ConfigFormBase {
    * Const to use in String Translations.
    */
   const CAT_API_T_CONTEXT = ['context' => 'CAT_API_MODULE'];
+
+  /**
+   * Function to return the the permission page link.
+   *
+   * @param string $text
+   *   A text to be used with the link.
+   *
+   * @return string
+   *   HTML Markup with link.
+   */
+  protected function getPermissionLink(string $text) {
+    $link_text = $this->t($text, [], self::CAT_API_T_CONTEXT);
+    $link_url = Url::fromRoute('user.admin_permissions', [], ['fragment' => 'module-cat_api']);
+    return Link::fromTextAndUrl($link_text, $link_url)->toString();
+  }
+
   /**
    * Function to return the documentation link.
    *
@@ -33,7 +49,7 @@ class CatApiAdminForm extends ConfigFormBase {
    *   HTML Markup with link.
    */
   protected function getDocumentationLink() {
-    $link_text = $this->t('The Cat API documentation');
+    $link_text = $this->t('The Cat API documentation', [], self::CAT_API_T_CONTEXT);
     $link_url = Url::fromUri('http://thecatapi.com/docs.html');
     return Link::fromTextAndUrl($link_text, $link_url)->toString();
   }
@@ -111,15 +127,15 @@ class CatApiAdminForm extends ConfigFormBase {
     ];
 
     if (!empty($key)) {
-      $form['cat_api_stats'] = ['#markup' => $this->getStatsList($key)];
+      $form['markup_1'] = ['#markup' => $this->getStatsList($key)];
     }
 
-    $form['cat_api_detail_1'] = [
+    $form['details_1'] = [
       '#type' => 'details',
       '#title' => $this->t('Image configurations', [], self::CAT_API_T_CONTEXT),
       '#open' => FALSE,
     ];
-    $form['cat_api_detail_1']['cat_api_size'] = [
+    $form['details_1']['cat_api_size'] = [
       '#type' => 'radios',
       '#title' => $this->t('Size'),
       '#options' => [
@@ -136,28 +152,55 @@ class CatApiAdminForm extends ConfigFormBase {
       'gif' => 'gif',
       'png' => 'png',
     ];
-    $form['cat_api_detail_1']['cat_api_formats'] = [
+    $form['details_1']['cat_api_formats'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Formats', [], self::CAT_API_T_CONTEXT),
       '#options' => $image_formats_options,
       '#default_value' => !empty($image_formats) ? $image_formats : $image_formats_options,
       '#required' => TRUE,
     ];
-    $form['cat_api_detail_2'] = [
+    $form['details_2'] = [
       '#type' => 'details',
       '#title' => $this->t('Cat Categories', [], self::CAT_API_T_CONTEXT),
       '#open' => FALSE,
     ];
-    $form['cat_api_detail_2']['cat_api_category_markup'] = [
+    $form['details_2']['markup_1'] = [
       '#markup' => $this->t('The <b>CAT</b>egories is a way to choose which kind of cat do you want to show. Unfortunatelly, the API permits only one category. For more information, please see the @docs.', ['@docs' => $this->getDocumentationLink()], self::CAT_API_T_CONTEXT),
     ];
-    $form['cat_api_detail_2']['cat_api_category'] = [
+    $form['details_2']['cat_api_category'] = [
       '#type' => 'radios',
       '#title' => $this->t('Available options', [], self::CAT_API_T_CONTEXT),
       '#options' => $this->getCategories(),
       '#default_value' => $config->get('cat_api_category'),
       '#required' => TRUE,
     ];
+    $form['details_3'] = [
+      '#type' => 'details',
+      '#title' => $this->t('User Actions', [], self::CAT_API_T_CONTEXT),
+      '#open' => FALSE,
+    ];
+    $form['details_3']['markup_1'] = [
+      '#markup' => $this->t('Enable a variety of possible interactions that users on your site can execute. For more information, pleasce check the @docs.', ['@docs' => $this->getDocumentationLink()], self::CAT_API_T_CONTEXT),
+    ];
+    $form['details_3']['cat_api_enable_vote'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable vote', [], self::CAT_API_T_CONTEXT),
+      '#description' => $this->t('Note: Users need <b>@permission</b> to use this feature.', ['@permission' => $this->getPermissionLink('Vote on a Cat permission')], self::CAT_API_T_CONTEXT),
+      '#default_value' => $config->get('cat_api_enable_vote'),
+    ];
+    $form['details_3']['cat_api_enable_report'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable report', [], self::CAT_API_T_CONTEXT),
+      '#description' => $this->t('Note: Users need <b>@permission</b> to use this feature.', ['@permission' => $this->getPermissionLink('Report a Cat permission')], self::CAT_API_T_CONTEXT),
+      '#default_value' => $config->get('cat_api_enable_report'),
+    ];
+    $form['details_3']['cat_api_enable_favorite'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable favorite', [], self::CAT_API_T_CONTEXT),
+      '#description' => $this->t('Note: Users need <b>@permission</b> to use this feature.', ['@permission' => $this->getPermissionLink('Favorite a Cat permission')], self::CAT_API_T_CONTEXT),
+      '#default_value' => $config->get('cat_api_enable_favorite'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -172,6 +215,9 @@ class CatApiAdminForm extends ConfigFormBase {
       ->set('cat_api_size', $form_state->getValue('cat_api_size'))
       ->set('cat_api_formats', $form_state->getValue('cat_api_formats'))
       ->set('cat_api_category', $form_state->getValue('cat_api_category'))
+      ->set('cat_api_enable_vote', $form_state->getValue('cat_api_enable_vote'))
+      ->set('cat_api_enable_report', $form_state->getValue('cat_api_enable_report'))
+      ->set('cat_api_enable_favorite', $form_state->getValue('cat_api_enable_favorite'))
       ->save();
 
     parent::submitForm($form, $form_state);

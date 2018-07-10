@@ -1,2 +1,11 @@
 access cat api content:
   title: "Access The Cat API content"
+cat api vote:
+  title: "Vote on a Cat"
+  description: "May need <b>Access The Cat API content permission</b> to work properly.<br/>Need to change configurations at <b><a href='/admin/config/cat_api/settings'>Cat API Configuration Page</a></b> to work properly."
+cat api report:
+  title: "Report a Cat"
+  description: "May need <b>Access The Cat API content permission</b> to work properly.<br/>Need to change configurations at <b><a href='/admin/config/cat_api/settings'>Cat API Configuration Page</a></b> to work properly."
+cat_api_favorite:
+  title: "Favorite a Cat"
+  description: "May need <b>Access The Cat API content permission</b> to work properly.<br/>Need to change configurations at <b><a href='/admin/config/cat_api/settings'>Cat API Configuration Page</a></b> to work properly."

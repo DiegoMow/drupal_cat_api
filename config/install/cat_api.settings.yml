@@ -1,1 +1,7 @@
 cat_api_url: 'http://thecatapi.com/api/'
+cat_api_size: 'full'
+cat_api_formats:
+  jpg: 'jpg'
+  png: 'png'
+  gif: 'gif'
+cat_api_category: 'all'
