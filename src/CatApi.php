@@ -9,6 +9,9 @@ namespace Drupal\cat_api;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Ajax\InvokeCommand;
 
 use Psr\Log\LoggerInterface;
 
@@ -104,6 +107,9 @@ class CatApi {
     if ($category !== 'all') {
       $params['category'] = $this->getCategoryName($category);
     }
+    if (\Drupal::currentUser()->isAuthenticated()) {
+      $params['sub_id'] = \Drupal::currentUser()->id();
+    }
     $result = $this->call(self::CAT_API_GET_IMAGES, $params);
     return $result['data']['images']['image'];
   }
@@ -136,7 +142,9 @@ class CatApi {
     if ($category !== 'all') {
       $params['category'] = $this->getCategoryName($category);
     }
-
+    if (\Drupal::currentUser()->isAuthenticated()) {
+      $params['sub_id'] = \Drupal::currentUser()->id();
+    }
     $results = $this->call(self::CAT_API_GET_IMAGES, $params);
     $images = $results['data']['images']['image'];
     // Normalize return for only one result.
@@ -207,4 +215,22 @@ class CatApi {
     return $this->call(self::CAT_API_STATS, $params);
   }
 
+  public function vote($id, $score = 0) {
+    $params = [
+      'image_id' => $id,
+      'score' => $score,
+    ];
+    if (\Drupal::currentUser()->isAuthenticated()) {
+      $params['sub_id'] = \Drupal::currentUser()->id();
+    }
+    // TODO: error handling.
+    $result = $this->call(self::CAT_API_VOTE, $params);
+    $output = '<div id="cat-api-message">' . $this->t('Thank You For the Vote!') . '</div>';
+    $response = new AjaxResponse();
+    $response->addCommand(new ReplaceCommand('#cat-api-message', $output))
+      ->addCommand(new InvokeCommand('#cat-api-block-vote-link', 'addClass', ['disabled']))
+      ->addCommand(new InvokeCommand('#cat-api-block-vote-link', 'attr', ['href', '']))
+      ->addCommand(new InvokeCommand('#cat-api-block-vote-link', 'text', ['You already voted for this cat!']));
+    return $response;
+  }
 }

@@ -7,3 +7,11 @@ cat_api.admin_settings_form:
     _permission: 'access administration pages'
   options:
     _admin_route: TRUE
+cat_api.vote_callback:
+  path: '/cat_api/vote/{id}/{score}'
+  defaults:
+    _controller: 'cat_api.api:vote'
+    id: ''
+    score: 0
+  requirements:
+    _permission: 'access content'
