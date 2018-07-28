@@ -26,33 +26,16 @@ class CatApiCatBlock extends BlockBase {
    */
   public function build() {
     // TODO: Render Favorites, and other stuff from api.
-    $image = \Drupal::service('cat_api.api')->getImage();
-    $link = $this->voteLink('Vote', $image['id'], 10, isset($image['score']));
-    $markup = '<div id="cat-api-message"></div><img src="' . $image['url'] . '" />' . $link;
+    $cat_api = \Drupal::service('cat_api.api');
+    $image = $cat_api->getImage();
+    $links = [
+      $cat_api->getFavoriteLink($image['id'], isset($image['favourite'])),
+      $cat_api->getVoteLink($image['id'], 10, isset($image['score']))
+    ];
+    $markup = '<div id="cat-api-message"></div><img src="' . $image['url'] . '" />' . implode('<br/>', $links);
     return [
       '#markup' => $markup,
     ];
-  }
-
-  public function voteLink(string $text, string $id, int $score = 10, bool $disabled = false) {
-    $options = [
-      'attributes'=> [
-        'class' => [
-          'use-ajax',
-          'vote-link'
-        ],
-        'id' => 'cat-api-block-vote-link'
-      ]
-    ];
-    $route = 'cat_api.vote_callback';
-    if ($disabled) {
-      $text = 'You already voted for this cat!';
-      $route = '<none>';
-      $options['attributes']['class'][] = 'disabled';
-    }
-    $params = ['id' => $id, 'score' => $score];
-    $url = Url::fromRoute($route, $params, $options);
-    return Link::fromTextAndUrl($this->t($text), $url)->toString();
   }
 
   /**

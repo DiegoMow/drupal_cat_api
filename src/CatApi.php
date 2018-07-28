@@ -9,6 +9,7 @@ namespace Drupal\cat_api;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
+use Drupal\Core\Link;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Ajax\InvokeCommand;
@@ -215,7 +216,7 @@ class CatApi {
     return $this->call(self::CAT_API_STATS, $params);
   }
 
-  public function vote($id, $score = 0) {
+  public function vote(string $id, int $score = 0) {
     $params = [
       'image_id' => $id,
       'score' => $score,
@@ -225,12 +226,87 @@ class CatApi {
     }
     // TODO: error handling.
     $result = $this->call(self::CAT_API_VOTE, $params);
+    $span = $this->getVoteLink($disabled = TRUE);
     $output = '<div id="cat-api-message">' . $this->t('Thank You For the Vote!') . '</div>';
     $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand('#cat-api-message', $output))
-      ->addCommand(new InvokeCommand('#cat-api-block-vote-link', 'addClass', ['disabled']))
-      ->addCommand(new InvokeCommand('#cat-api-block-vote-link', 'attr', ['href', '']))
-      ->addCommand(new InvokeCommand('#cat-api-block-vote-link', 'text', ['You already voted for this cat!']));
+      ->addCommand(new ReplaceCommand('#cat-api-block-vote-link', $span));
     return $response;
   }
+
+  /**
+   * Helper function to generate the Link for vote.
+   *
+   * @param string $id
+   *   The image ID.
+   * @param int $score
+   *   The score you want to apply for the cat.
+   * @param bool $disabled
+   *   If true, generate a span to avoid voting.
+   *
+   * @return string
+   *   A Link/Span Markup.
+   */
+
+  public function getVoteLink(string $id = '', int $score = 10, bool $disabled = false) {
+    if ($disabled) {
+      return '<span>' . $this->t('You already voted for this cat!') . '</span>';
+    }
+    $options = [
+      'attributes'=> [
+        'class' => [
+          'use-ajax',
+          'vote-link'
+        ],
+        'id' => 'cat-api-block-vote-link'
+      ]
+    ];
+    $route = 'cat_api.vote_callback';
+    $params = ['id' => $id, 'score' => $score];
+    $url = Url::fromRoute($route, $params, $options);
+    return Link::fromTextAndUrl($this->t('Vote'), $url)->toString();
+  }
+
+  public function favorite(string $id, string $action = 'add') {
+    $params = [
+      'image_id' => $id,
+      'action' => $action,
+    ];
+    if (\Drupal::currentUser()->isAuthenticated()) {
+      $params['sub_id'] = \Drupal::currentUser()->id();
+    }
+    // TODO: error handling.
+    $result = $this->call(self::CAT_API_FAVORITE, $params);
+    $message = $this->t('Cat added to your favourites CATalog.');
+    if ($action === 'remove') {
+      $message = $this->t('This Cat is not a favourite anymore.');
+    }
+    $link = $this->getFavoriteLink($id, ($action !== 'remove'));
+    $output = '<div id="cat-api-message">' . $message . '</div>';
+    $response = new AjaxResponse();
+    $response->addCommand(new ReplaceCommand('#cat-api-message', $output))
+      ->addCommand(new ReplaceCommand('#cat-api-block-favorite-link', $link));
+    return $response;
+  }
+
+  public function getFavoriteLink(string $id, bool $remove = false) {
+    $options = [
+      'attributes'=> [
+        'class' => [
+          'use-ajax',
+          'favorite-link'
+        ],
+        'id' => 'cat-api-block-favorite-link'
+      ]
+    ];
+    $params = ['id' => $id, 'action' => 'add'];
+    $text = 'Add to favorites';
+    if ($remove) {
+      $text = 'Remove from favorites';
+      $params['action'] = 'remove';
+    }
+    $url = Url::fromRoute('cat_api.favorite_callback', $params, $options);
+    return Link::fromTextAndUrl($this->t($text), $url)->toString();
+  }
+
 }
