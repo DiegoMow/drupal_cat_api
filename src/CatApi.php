@@ -217,6 +217,9 @@ class CatApi {
   }
 
   public function vote(string $id, int $score = 0) {
+    if (!$this->config->get('cat_api_enable_vote')) {
+      return;
+    }
     $params = [
       'image_id' => $id,
       'score' => $score,
@@ -249,6 +252,9 @@ class CatApi {
    */
 
   public function getVoteLink(string $id = '', int $score = 10, bool $disabled = false) {
+    if (!$this->config->get('cat_api_enable_vote')) {
+      return '';
+    }
     if ($disabled) {
       return '<span>' . $this->t('You already voted for this cat!') . '</span>';
     }
@@ -268,6 +274,9 @@ class CatApi {
   }
 
   public function favorite(string $id, string $action = 'add') {
+    if (!$this->config->get('cat_api_enable_favorite')) {
+      return;
+    }
     $params = [
       'image_id' => $id,
       'action' => $action,
@@ -290,6 +299,9 @@ class CatApi {
   }
 
   public function getFavoriteLink(string $id, bool $remove = false) {
+    if (!$this->config->get('cat_api_enable_favorite')) {
+      return '';
+    }
     $options = [
       'attributes'=> [
         'class' => [
@@ -310,6 +322,9 @@ class CatApi {
   }
 
   public function report(string $id, string $reason = '') {
+    if (!$this->config->get('cat_api_enable_report')) {
+      return;
+    }
     $params = ['image_id' => $id];
     // TODO: Add reason system from config.
     if (!empty($reason)) {
@@ -329,6 +344,9 @@ class CatApi {
   }
 
   public function getReportLink(string $id, string $reason = '') {
+    if (!$this->config->get('cat_api_enable_report')) {
+      return '';
+    }
     $options = [
       'attributes'=> [
         'class' => [
