@@ -16,6 +16,9 @@ use Drupal\Core\Ajax\InvokeCommand;
 
 use Psr\Log\LoggerInterface;
 
+/**
+ * Default class for Cat Api usage.
+ */
 class CatApi {
   use StringTranslationTrait;
 
@@ -67,7 +70,18 @@ class CatApi {
     $this->logger = $logger;
   }
 
-  public function call(string $api_endpoint, array $params = []) {
+  /**
+   * Function to execute the API Calls.
+   *
+   * @param string $api_endpoint
+   *   Endpoint to call.
+   * @param array $params
+   *   Parameters to use on call.
+   *
+   * @return array
+   *   An Array with data from the call.
+   */
+  public function call($api_endpoint, array $params = []) {
     // TODO: Implement CACHE.
     $api_key = $this->config->get('cat_api_key');
     if (!empty($api_key) && !isset($params['api_key'])) {
@@ -81,7 +95,7 @@ class CatApi {
     $request = $client->request('GET', $url);
     $results = new \SimpleXMLElement($request->getBody()->getContents());
 
-    return json_decode(json_encode($results), true);
+    return json_decode(json_encode($results), TRUE);
   }
 
   /**
@@ -93,7 +107,7 @@ class CatApi {
    * @return array
    *   An array with image data.
    */
-  public function getImage(string $id = '') {
+  public function getImage($id = '') {
     $params = [
       'results_per_page' => 1,
       'format' => 'xml',
@@ -124,7 +138,7 @@ class CatApi {
    * @return array
    *   A multiple array with images data.
    */
-  public function getImages(int $qtde) {
+  public function getImages($qtde) {
     $params = [
       'results_per_page' => $qtde,
       'format' => 'xml',
@@ -163,7 +177,7 @@ class CatApi {
     if (empty($formats)) {
       return 'jpg,gif,png';
     }
-    foreach ($formats as $key=>$value) {
+    foreach ($formats as $key => $value) {
       if ($value === 0) {
         unset($formats[$key]);
       }
@@ -173,7 +187,7 @@ class CatApi {
 
   /**
    * Get a complete list of Categories.
-   * 
+   *
    * @return array
    *   An array with existing categories.
    */
@@ -191,7 +205,7 @@ class CatApi {
    * @return string
    *   The name of the Category.
    */
-  public function getCategoryName(string $id) {
+  public function getCategoryName($id) {
     $name = '';
     $categories = $this->getCategories();
     foreach ($categories as $category) {
@@ -209,16 +223,27 @@ class CatApi {
    * @param string $key
    *   The API Key to check. Use default if not set.
    */
-  public function getStats(string $key = '') {
+  public function getStats($key = '') {
     $params = [
       'api_key' => !empty($key) ? $key : $this->config->get('cat_api_key'),
     ];
     return $this->call(self::CAT_API_STATS, $params);
   }
 
-  public function vote(string $id, int $score = 0) {
+  /**
+   * Vote on a cat.
+   *
+   * @param string $id
+   *   Id of the cat.
+   * @param int $score
+   *   Score of the cat.
+   *
+   * @return AjaxResponse
+   *   An Ajax response with the new vote link.
+   */
+  public function vote($id, $score = 0) {
     if (!$this->config->get('cat_api_enable_vote')) {
-      return;
+      return new AjaxResponse();
     }
     $params = [
       'image_id' => $id,
@@ -250,8 +275,7 @@ class CatApi {
    * @return string
    *   A Link/Span Markup.
    */
-
-  public function getVoteLink(string $id = '', int $score = 10, bool $disabled = false) {
+  public function getVoteLink($id = '', $score = 10, $disabled = FALSE) {
     if (!$this->config->get('cat_api_enable_vote')) {
       return '';
     }
@@ -259,7 +283,7 @@ class CatApi {
       return '<span>' . $this->t('You already voted for this cat!') . '</span>';
     }
     $options = [
-      'attributes'=> [
+      'attributes' => [
         'class' => [
           'use-ajax',
           'vote-link'
@@ -273,9 +297,20 @@ class CatApi {
     return Link::fromTextAndUrl($this->t('Vote'), $url)->toString();
   }
 
-  public function favorite(string $id, string $action = 'add') {
+  /**
+   * Add removes Cat from favorites.
+   *
+   * @param string $id
+   *   Id of the cat.
+   * @param string $action
+   *   Use "add" to Add the cat, and "remove" to remove the cat.
+   *
+   * @return AjaxResponse
+   *   An Ajax response with the new favorite link.
+   */
+  public function favorite($id, $action = 'add') {
     if (!$this->config->get('cat_api_enable_favorite')) {
-      return;
+      return new AjaxResponse();
     }
     $params = [
       'image_id' => $id,
@@ -298,12 +333,23 @@ class CatApi {
     return $response;
   }
 
-  public function getFavoriteLink(string $id, bool $remove = false) {
+  /**
+   * Helper function to generate the Link for Favorite.
+   *
+   * @param string $id
+   *   The image ID.
+   * @param bool $remove
+   *   If true, generate a link to remove from favorites.
+   *
+   * @return string
+   *   A Link/Span Markup.
+   */
+  public function getFavoriteLink($id, $remove = FALSE) {
     if (!$this->config->get('cat_api_enable_favorite')) {
       return '';
     }
     $options = [
-      'attributes'=> [
+      'attributes' => [
         'class' => [
           'use-ajax',
           'favorite-link'
@@ -321,9 +367,20 @@ class CatApi {
     return Link::fromTextAndUrl($this->t($text), $url)->toString();
   }
 
-  public function report(string $id, string $reason = '') {
+  /**
+   * Report a Cat so your API Key doesn't show it anymore.
+   *
+   * @param string $id
+   *   Id of the cat.
+   * @param string $reason
+   *   The reason for reporting this cat.
+   *
+   * @return AjaxResponse
+   *   An Ajax response to remove the report link.
+   */
+  public function report($id, $reason = '') {
     if (!$this->config->get('cat_api_enable_report')) {
-      return;
+      return new AjaxResponse();
     }
     $params = ['image_id' => $id];
     // TODO: Add reason system from config.
@@ -343,12 +400,23 @@ class CatApi {
     return $response;
   }
 
-  public function getReportLink(string $id, string $reason = '') {
+  /**
+   * Helper function to generate the Link for vote.
+   *
+   * @param string $id
+   *   The image ID.
+   * @param string $reason
+   *   The string with the reason.
+   *
+   * @return string
+   *   A Link/Span Markup.
+   */
+  public function getReportLink($id, $reason = '') {
     if (!$this->config->get('cat_api_enable_report')) {
       return '';
     }
     $options = [
-      'attributes'=> [
+      'attributes' => [
         'class' => [
           'use-ajax',
           'report-link'

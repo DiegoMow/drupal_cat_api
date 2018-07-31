@@ -36,7 +36,7 @@ class CatApiAdminForm extends ConfigFormBase {
    * @return string
    *   HTML Markup with link.
    */
-  protected function getPermissionLink(string $text) {
+  protected function getPermissionLink($text) {
     $link_text = $this->t($text, [], self::CAT_API_T_CONTEXT);
     $link_url = Url::fromRoute('user.admin_permissions', [], ['fragment' => 'module-cat_api']);
     return Link::fromTextAndUrl($link_text, $link_url)->toString();
@@ -63,7 +63,7 @@ class CatApiAdminForm extends ConfigFormBase {
    * @return string
    *   An string markup to use as Markup Element.
    */
-  protected function getStatsList(string $key) {
+  protected function getStatsList($key) {
     $stats = \Drupal::service('cat_api.api')->getStats($key);
     $stats = $stats['data']['stats']['statsoverview'];
     return $this->t('The inputed API Key already did: ', [], self::CAT_API_T_CONTEXT) .
@@ -147,7 +147,7 @@ class CatApiAdminForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
     $image_formats = $config->get('cat_api_formats');
-    $image_formats_options =[
+    $image_formats_options = [
       'jpg' => 'jpg',
       'gif' => 'gif',
       'png' => 'png',
