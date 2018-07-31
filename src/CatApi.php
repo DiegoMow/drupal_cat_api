@@ -309,4 +309,42 @@ class CatApi {
     return Link::fromTextAndUrl($this->t($text), $url)->toString();
   }
 
+  public function report(string $id, string $reason = '') {
+    $params = ['image_id' => $id];
+    // TODO: Add reason system from config.
+    if (!empty($reason)) {
+      $params['reason'] = $reason;
+    }
+    if (\Drupal::currentUser()->isAuthenticated()) {
+      $params['sub_id'] = \Drupal::currentUser()->id();
+    }
+    // TODO: error handling.
+    $result = $this->call(self::CAT_API_REPORT, $params);
+    $message = $this->t('Cat taken to the Cat Watcher.');
+    $output = '<div id="cat-api-message">' . $message . '</div>';
+    $response = new AjaxResponse();
+    $response->addCommand(new ReplaceCommand('#cat-api-message', $output))
+      ->addCommand(new ReplaceCommand('#cat-api-block-report-link', ''));
+    return $response;
+  }
+
+  public function getReportLink(string $id, string $reason = '') {
+    $options = [
+      'attributes'=> [
+        'class' => [
+          'use-ajax',
+          'report-link'
+        ],
+        'id' => 'cat-api-block-report-link'
+      ]
+    ];
+    $params = ['id' => $id];
+    if (!empty($reason)) {
+      $params['reason'] = $reason;
+    }
+    $text = 'Report this cat';
+    $url = Url::fromRoute('cat_api.report_callback', $params, $options);
+    return Link::fromTextAndUrl($this->t($text), $url)->toString();
+  }
+
 }

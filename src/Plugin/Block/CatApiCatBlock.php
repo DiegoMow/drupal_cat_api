@@ -30,7 +30,8 @@ class CatApiCatBlock extends BlockBase {
     $image = $cat_api->getImage();
     $links = [
       $cat_api->getFavoriteLink($image['id'], isset($image['favourite'])),
-      $cat_api->getVoteLink($image['id'], 10, isset($image['score']))
+      $cat_api->getVoteLink($image['id'], 10, isset($image['score'])),
+      $cat_api->getReportLink($image['id'])
     ];
     $markup = '<div id="cat-api-message"></div><img src="' . $image['url'] . '" />' . implode('<br/>', $links);
     return [

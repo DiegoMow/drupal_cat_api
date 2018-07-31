@@ -19,6 +19,15 @@ cat_api.favorite_callback:
   path: '/cat_api/favorite/{id}/{action}'
   defaults:
     _controller: 'cat_api.api:favorite'
-    id: 'add'
+    id: ''
+    action: 'add'
   requirements:
     _permission: 'cat api favorite'
+cat_api.report_callback:
+  path: '/cat_api/report/{id}/{reason}'
+  defaults:
+    _controller: 'cat_api.api:report'
+    id: 'add'
+    reason: ''
+  requirements:
+    _permission: 'cat api report'
